@@ -4,7 +4,10 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "https://tic-tac-toe-mu-blue.vercel.app", // Allow only your Vercel client
+  methods: ["GET", "POST"],
+}));
 
 const server = createServer(app);
 const io = new Server(server, {
