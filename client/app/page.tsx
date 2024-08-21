@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 
 // const socket: Socket = io("http://localhost:3000/");
-const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com");
+const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
 
 
 interface RoomInfo {
