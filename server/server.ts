@@ -9,11 +9,11 @@ app.use(cors());
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    // origin: "http://localhost:3001",
-    origin: "https://tic-tac-toe-mu-blue.vercel.app/",
+    origin: ["https://tic-tac-toe-mu-blue.vercel.app", "https://www.tic-tac-toe-mu-blue.vercel.app"],
     methods: ["GET", "POST"],
   },
 });
+
 
 const rooms = {}; // Track room data
 const openRooms = new Set(); // Track available rooms
