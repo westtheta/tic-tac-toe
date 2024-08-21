@@ -94,7 +94,13 @@ export default function Home() {
   }, []);
 
   const handlePlay = (index: number) => {
-    if (board[index] !== "" || gameOver || !gameStarted || role !== (isXPlaying ? "X" : "O")) return;
+    if (
+      board[index] !== "" ||
+      gameOver ||
+      !gameStarted ||
+      role !== (isXPlaying ? "X" : "O")
+    )
+      return;
 
     socket.emit("playMove", { room: roomNumber, index } as PlayMoveData);
   };
@@ -182,7 +188,13 @@ export default function Home() {
 
       {showToast && (
         <div className="fixed bottom-0 right-0 p-4 bg-gray-900 text-white">
-          {gameOver ? `Game Over! ${winningIndexes.length > 0 ? `${role === "X" ? "O" : "X"} Wins!` : "It's a Draw!"}` : ""}
+          {gameOver
+            ? `Game Over! ${
+                winningIndexes.length > 0
+                  ? `${role === "X" ? "O" : "X"} Wins!`
+                  : "It's a Draw!"
+              }`
+            : ""}
         </div>
       )}
 
@@ -194,4 +206,3 @@ export default function Home() {
     </main>
   );
 }
-
