@@ -9,14 +9,20 @@ app.use(cors());
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["https://tic-tac-toe-mu-blue.vercel.app", "https://www.tic-tac-toe-mu-blue.vercel.app"],
+    origin: [
+      "https://tic-tac-toe-mu-blue.vercel.app",
+      "https://www.tic-tac-toe-mu-blue.vercel.app",
+    ],
     methods: ["GET", "POST"],
   },
 });
 
-app.get("/cron",(req, res)=>{res.send("Wagwan my bro")})
-const rooms = {}; // Track room data
-const openRooms = new Set(); // Track available rooms
+app.get("/cron", (req, res) => {
+  res.send("Wagwan my bro");
+});
+
+const rooms = {};
+const openRooms = new Set();
 
 io.on("connection", (socket) => {
   console.log(`User ${socket.id} connected`);
@@ -64,7 +70,9 @@ io.on("connection", (socket) => {
   socket.on("playMove", ({ room, index }) => {
     const roomData = rooms[room];
     if (roomData && roomData.gameStarted) {
-      const currentPlayer = roomData.players.find((player) => player.id === socket.id)?.role;
+      const currentPlayer = roomData.players.find(
+        (player) => player.id === socket.id
+      )?.role;
       const currentTurn =
         roomData.board.filter((cell) => cell !== "").length % 2 === 0
           ? "X"
@@ -97,7 +105,51 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("quitGame", (room) => {
+    socket.leave(room);
+    const roomData = rooms[room];
+    if (roomData) {
+      roomData.players = roomData.players.filter(
+        (player) => player.id !== socket.id
+      );
+      if (roomData.players.length === 0) {
+        delete rooms[room];
+        openRooms.delete(room);
+        io.emit("roomInfo", {
+          message: "Available rooms",
+          rooms: Array.from(openRooms),
+        });
+      } else {
+        io.to(room).emit("roomInfo", {
+          message: "Other player left, waiting for a new player...",
+        });
+      }
+    }
+  });
+
   socket.on("disconnect", () => {
+    for (const room of socket.rooms) {
+      if (room !== socket.id) {
+        const roomData = rooms[room];
+        if (roomData) {
+          roomData.players = roomData.players.filter(
+            (player) => player.id !== socket.id
+          );
+          if (roomData.players.length === 0) {
+            delete rooms[room];
+            openRooms.delete(room);
+            io.emit("roomInfo", {
+              message: "Available rooms",
+              rooms: Array.from(openRooms),
+            });
+          } else {
+            io.to(room).emit("roomInfo", {
+              message: "Other player disconnected, waiting for a new player...",
+            });
+          }
+        }
+      }
+    }
     console.log(`User ${socket.id} disconnected`);
   });
 });
@@ -147,4 +199,3 @@ function getWinningCombination(board) {
 server.listen(3000, () => {
   console.log("Server running on port 3000");
 });
-
