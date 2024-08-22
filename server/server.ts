@@ -20,7 +20,6 @@ const io = new Server(server, {
 app.get("/cron", (req, res) => {
   res.send("Wagwan my bro");
 });
-
 const rooms = {};
 const openRooms = new Set();
 
@@ -105,51 +104,8 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("quitGame", (room) => {
+  socket.on("disconnect", (room) => {
     socket.leave(room);
-    const roomData = rooms[room];
-    if (roomData) {
-      roomData.players = roomData.players.filter(
-        (player) => player.id !== socket.id
-      );
-      if (roomData.players.length === 0) {
-        delete rooms[room];
-        openRooms.delete(room);
-        io.emit("roomInfo", {
-          message: "Available rooms",
-          rooms: Array.from(openRooms),
-        });
-      } else {
-        io.to(room).emit("roomInfo", {
-          message: "Other player left, waiting for a new player...",
-        });
-      }
-    }
-  });
-
-  socket.on("disconnect", () => {
-    for (const room of socket.rooms) {
-      if (room !== socket.id) {
-        const roomData = rooms[room];
-        if (roomData) {
-          roomData.players = roomData.players.filter(
-            (player) => player.id !== socket.id
-          );
-          if (roomData.players.length === 0) {
-            delete rooms[room];
-            openRooms.delete(room);
-            io.emit("roomInfo", {
-              message: "Available rooms",
-              rooms: Array.from(openRooms),
-            });
-          } else {
-            io.to(room).emit("roomInfo", {
-              message: "Other player disconnected, waiting for a new player...",
-            });
-          }
-        }
-      }
-    }
     console.log(`User ${socket.id} disconnected`);
   });
 });

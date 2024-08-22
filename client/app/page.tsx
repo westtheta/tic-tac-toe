@@ -72,17 +72,16 @@ export default function Home() {
         } else {
           setOWins((prev) => prev + 1);
         }
-        if (data.winningCombination) {
-          setWinningIndexes(data.winningCombination);
-        }
+        setWinningIndexes(data.winningCombination || []);
       }
     });
 
     socket.on("gameReset", (newBoard: string[]) => {
       setBoard(newBoard);
-      setIsXPlaying(true);
       setGameOver(false);
       setWinningIndexes([]);
+      setShowToast(false);
+      setIsXPlaying(true); // Reset to X's turn
     });
 
     return () => {
@@ -95,123 +94,127 @@ export default function Home() {
     };
   }, []);
 
-  const handleCellClick = (index: number) => {
-    if (!gameOver && board[index] === "" && role === (isXPlaying ? "X" : "O")) {
-      socket.emit("playMove", { room: roomNumber, index });
-    }
-  };
+  const handlePlay = (index: number) => {
+    if (
+      board[index] !== "" ||
+      gameOver ||
+      !gameStarted ||
+      role !== (isXPlaying ? "X" : "O")
+    )
+      return;
 
-  const handleRoomJoin = () => {
-    if (inputRoom.trim() !== "") {
-      socket.emit("joinRoom", inputRoom.trim());
-      setRoomNumber(inputRoom.trim());
-      setInRoom(true);
-    }
+    socket.emit("playMove", { room: roomNumber, index } as PlayMoveData);
   };
 
   const resetGame = () => {
     socket.emit("resetGame", roomNumber);
-    setShowToast(false);
   };
 
-  const quitGame = () => {
-    socket.emit("quitGame", roomNumber);
+  const startGame = () => {
+    const roomNumber = generateRoomNumber();
+    setRoomNumber(roomNumber);
+    socket.emit("joinRoom", roomNumber);
+    setInRoom(true);
+  };
+
+  const joinRoom = () => {
+    if (inputRoom.trim() !== "") {
+      setRoomNumber(inputRoom);
+      socket.emit("joinRoom", inputRoom);
+      setInRoom(true);
+    }
+  };
+
+  const generateRoomNumber = () => {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+  };
+  const handleQuitGame = () => {
+    socket.emit("disco")
     setInRoom(false);
-    setRoomNumber("");
-    setInputRoom("");
-    setGameStarted(false);
-    setBoard(Array(9).fill(""));
-    setGameOver(false);
-    setShowToast(false);
-    setInfoMessage("");
-    setWinningIndexes([]);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-200">
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
       {!inRoom ? (
         <div className="flex flex-col items-center gap-4">
-          <h1 className="text-4xl font-bold mb-8">Join a Room</h1>
-          <input
-            type="text"
-            placeholder="Enter Room Number"
-            value={inputRoom}
-            onChange={(e) => setInputRoom(e.target.value)}
-            className="p-2 rounded border"
-          />
-          <button
-            onClick={handleRoomJoin}
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-          >
-            Join Room
+          <h2 className="text-2xl font-bold">Tic-Tac-Toe</h2>
+          <button onClick={startGame} className="p-2 bg-blue-500 text-white">
+            Create Room
           </button>
-          <div className="mt-4">
-            <h2 className="text-xl font-semibold">Available Rooms:</h2>
-            {availableRooms.length > 0 ? (
-              <ul className="list-disc ml-6 mt-2">
-                {availableRooms.map((room) => (
-                  <li key={room} className="cursor-pointer">
-                    <span
-                      onClick={() => {
-                        setInputRoom(room);
-                      }}
-                    >
-                      {room}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No rooms available</p>
-            )}
+          <div>
+            <input
+              type="text"
+              placeholder="Enter room number"
+              value={inputRoom}
+              onChange={(e) => setInputRoom(e.target.value)}
+              className="border p-2"
+            />
+            <button onClick={joinRoom} className="p-2 bg-blue-500 text-white">
+              Join Room
+            </button>
+          </div>
+          <div>
+            <h3>Available Rooms</h3>
+            <ul>
+              {availableRooms.map((room) => (
+                <li key={room}>{room}</li>
+              ))}
+            </ul>
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center">
-          <h1 className="text-2xl font-bold mb-4">
-            Room: {roomNumber} | Role: {role}
-          </h1>
-          <h2 className="text-lg mb-4">{infoMessage}</h2>
-          <div className="grid grid-cols-3 gap-4 mb-4">
+        <>
+          <h3 className="text-2xl font-bold mb-4">Room {roomNumber}</h3>
+          <div className="grid grid-cols-3 gap-4">
             {board.map((cell, index) => (
-              <div
+              <button
                 key={index}
-                onClick={() => handleCellClick(index)}
-                className={`w-16 h-16 flex items-center justify-center text-2xl font-bold cursor-pointer border ${
-                  winningIndexes.includes(index)
-                    ? "bg-green-200"
-                    : "bg-white"
+                onClick={() => handlePlay(index)}
+                className={`border p-8 ${
+                  winningIndexes.includes(index) ? "bg-green-300" : ""
                 }`}
               >
                 {cell}
-              </div>
+              </button>
             ))}
           </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={resetGame}
-              className="px-4 py-2 bg-green-500 text-white rounded"
-            >
+          <div className="flex items-center justify-between mt-4">
+            <button onClick={resetGame} className="p-2 bg-red-500 text-white">
               Reset Game
             </button>
-            <button
-              onClick={quitGame}
-              className="px-4 py-2 bg-red-500 text-white rounded"
-            >
-              Quit Game
-            </button>
-          </div>
-          {showToast && (
-            <div className="mt-4 bg-yellow-300 p-2 rounded">
-              {gameOver
-                ? winningIndexes.length > 0
-                  ? `Game Over! ${role} Wins!`
-                  : "Game Over! It's a draw!"
-                : ""}
+            <div>
+              <p>
+                X Wins: {xWins} | O Wins: {oWins}
+              </p>
             </div>
-          )}
+          </div>
+        </>
+      )}
+
+      {showToast && (
+        <div className="fixed bottom-0 right-0 p-4 bg-gray-900 text-white">
+          {gameOver
+            ? `Game Over! ${
+                winningIndexes.length > 0
+                  ? `${role === "X" ? "O" : "X"} Wins!`
+                  : "It's a Draw!"
+              }`
+            : ""}
         </div>
       )}
-    </div>
+      {inRoom && (
+        <div
+          className="fixed bottom-0 left-1/2 bg-red-700 text-white p-4 cursor-pointer"
+          onClick={handleQuitGame}
+        >
+          Quit Game
+        </div>
+      )}
+      {infoMessage && (
+        <div className="fixed bottom-0 left-0 p-4 bg-gray-700 text-white">
+          {infoMessage}
+        </div>
+      )}
+    </main>
   );
 }
