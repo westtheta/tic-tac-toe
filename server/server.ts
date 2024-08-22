@@ -14,7 +14,7 @@ const io = new Server(server, {
   },
 });
 
-
+app.get("/cron",(req, res)=>{res.send("Wagwan my bro")})
 const rooms = {}; // Track room data
 const openRooms = new Set(); // Track available rooms
 
