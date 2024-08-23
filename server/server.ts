@@ -1,11 +1,25 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const cors = require("cors");
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+app.use(cors());
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "https://tic-tac-toe-mu-blue.vercel.app",
+      "https://www.tic-tac-toe-mu-blue.vercel.app",
+    ],
+    methods: ["GET", "POST"],
+  },
+});
+
+app.get("/cron", (req, res) => {
+  res.send("Wagwan my bro");
+});
 let rooms = {};
 let openRooms = new Set();
 
