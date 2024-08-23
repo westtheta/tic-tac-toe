@@ -72,7 +72,17 @@ export default function Home() {
       setInRoom(false);
       setGameStarted(false);
     });
+    socket.on("playerQuit", (message) => {
+      setInfoMessage("Your opponent has quit the game.");
+      setInRoom(false);
+      setGameStarted(false);
+    });
 
+    socket.on("playerDisconnected", (message) => {
+      setInfoMessage("Your opponent has quit the game.");
+      setInRoom(false);
+      setGameStarted(false);
+    });
     return () => {
       socket.off("roleAssignment");
       socket.off("roomInfo");
@@ -93,7 +103,7 @@ export default function Home() {
     )
       return;
 
-    socket.emit("playMove", { room: roomNumber, index } );
+    socket.emit("playMove", { room: roomNumber, index });
   };
 
   const resetGame = () => {

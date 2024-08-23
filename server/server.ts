@@ -1,27 +1,13 @@
 const express = require("express");
-const { createServer } = require("node:http");
+const http = require("http");
 const { Server } = require("socket.io");
-const cors = require("cors");
 
 const app = express();
-app.use(cors());
+const server = http.createServer(app);
+const io = new Server(server);
 
-const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: [
-      "https://tic-tac-toe-mu-blue.vercel.app",
-      "https://www.tic-tac-toe-mu-blue.vercel.app",
-    ],
-    methods: ["GET", "POST"],
-  },
-});
-
-app.get("/cron", (req, res) => {
-  res.send("Wagwan my bro");
-});
-const rooms = {};
-const openRooms = new Set();
+let rooms = {};
+let openRooms = new Set();
 
 io.on("connection", (socket) => {
   console.log(`User ${socket.id} connected`);
@@ -32,7 +18,6 @@ io.on("connection", (socket) => {
     if (!rooms[room]) {
       rooms[room] = {
         players: [],
-        gameStarted: false,
         board: Array(9).fill(""),
         scores: { X: 0, O: 0 },
         turn: "X",
@@ -86,12 +71,14 @@ io.on("connection", (socket) => {
 
   socket.on("quitGame", (room) => {
     if (rooms[room]) {
-      const opponentId = rooms[room].players.find(
-        (id) => id !== socket.id
-      );
+      // Notify all players in the room that someone quit
+      io.in(room).emit("playerQuit", "A player has quit the game.");
+
+      const opponentId = rooms[room].players.find((id) => id !== socket.id);
       if (opponentId) {
         io.to(opponentId).emit("opponentQuit");
       }
+
       delete rooms[room];
       socket.leave(room);
     }
@@ -103,10 +90,14 @@ io.on("connection", (socket) => {
     for (const room in rooms) {
       const roomData = rooms[room];
       if (roomData.players.includes(socket.id)) {
+        // Notify all players in the room that someone disconnected
+        io.in(room).emit("playerDisconnected", "A player has disconnected.");
+
         const opponentId = roomData.players.find((id) => id !== socket.id);
         if (opponentId) {
           io.to(opponentId).emit("opponentQuit");
         }
+
         delete rooms[room];
         break;
       }
