@@ -91,6 +91,8 @@ export default function Home() {
       socket.off("gameOver");
       socket.off("gameReset");
       socket.off("opponentQuit");
+      socket.off("playerQuit");
+      socket.off("playerDisconnected");
     };
   }, []);
 
