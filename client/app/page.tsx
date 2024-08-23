@@ -2,23 +2,7 @@
 import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 
-// const socket: Socket = io("http://localhost:3000/");
 const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
-
-interface RoomInfo {
-  message: string;
-  rooms?: string[];
-}
-
-interface GameOverData {
-  winner: "X" | "O" | null;
-  winningCombination?: number[];
-}
-
-interface PlayMoveData {
-  room: string;
-  index: number;
-}
 
 export default function Home() {
   const [board, setBoard] = useState<string[]>(Array(9).fill(""));
@@ -41,7 +25,7 @@ export default function Home() {
       setRole(data.role);
     });
 
-    socket.on("roomInfo", (data: RoomInfo) => {
+    socket.on("roomInfo", (data) => {
       setInfoMessage(data.message);
       if (data.rooms) {
         setAvailableRooms(data.rooms);
@@ -58,12 +42,11 @@ export default function Home() {
     socket.on("boardUpdate", (newBoard: string[]) => {
       setBoard(newBoard);
 
-      // Determine whose turn it is based on the number of moves made
       const xTurn = newBoard.filter((cell) => cell !== "").length % 2 === 0;
       setIsXPlaying(xTurn);
     });
 
-    socket.on("gameOver", (data: GameOverData) => {
+    socket.on("gameOver", (data) => {
       setGameOver(true);
       setShowToast(true);
       if (data.winner) {
@@ -81,7 +64,13 @@ export default function Home() {
       setGameOver(false);
       setWinningIndexes([]);
       setShowToast(false);
-      setIsXPlaying(true); // Reset to X's turn
+      setIsXPlaying(true);
+    });
+
+    socket.on("opponentQuit", () => {
+      setInfoMessage("Your opponent has quit the game.");
+      setInRoom(false);
+      setGameStarted(false);
     });
 
     return () => {
@@ -91,6 +80,7 @@ export default function Home() {
       socket.off("boardUpdate");
       socket.off("gameOver");
       socket.off("gameReset");
+      socket.off("opponentQuit");
     };
   }, []);
 
@@ -103,7 +93,7 @@ export default function Home() {
     )
       return;
 
-    socket.emit("playMove", { room: roomNumber, index } as PlayMoveData);
+    socket.emit("playMove", { room: roomNumber, index } );
   };
 
   const resetGame = () => {
@@ -128,8 +118,9 @@ export default function Home() {
   const generateRoomNumber = () => {
     return Math.floor(1000 + Math.random() * 9000).toString();
   };
+
   const handleQuitGame = () => {
-    socket.emit("disco")
+    socket.emit("quitGame", roomNumber);
     setInRoom(false);
   };
 
@@ -204,7 +195,7 @@ export default function Home() {
       )}
       {inRoom && (
         <div
-          className="fixed bottom-0 left-1/2 bg-red-700 text-white p-4 cursor-pointer"
+          className="fixed top-0 left-0 bg-red-700 text-white p-4 cursor-pointer"
           onClick={handleQuitGame}
         >
           Quit Game
