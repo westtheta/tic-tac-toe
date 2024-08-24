@@ -1,10 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
+import { CanvasInterface, CanvasClient } from "@dscvr-one/canvas-client-sdk";
 
 const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
+const canvasClient = new CanvasClient();
 
-export default function Home() {
+export default async function Home() {
+  const canvasHandshakeResponse = await canvasClient.ready();
+
   const [board, setBoard] = useState<string[]>(Array(9).fill(""));
   const [isXPlaying, setIsXPlaying] = useState<boolean>(true);
   const [gameOver, setGameOver] = useState<boolean>(false);
@@ -19,8 +23,14 @@ export default function Home() {
   const [oWins, setOWins] = useState<number>(0);
   const [availableRooms, setAvailableRooms] = useState<string[]>([]);
   const [role, setRole] = useState<"X" | "O" | "">("");
+  const [user, setUser] = useState<
+    { id: string; username: string; avatar?: string | undefined } | undefined
+  >(undefined);
 
   useEffect(() => {
+    if (canvasHandshakeResponse) {
+      setUser(canvasHandshakeResponse.untrusted.user);
+    }
     socket.on("roleAssignment", (data: { role: "X" | "O" }) => {
       setRole(data.role);
     });
@@ -114,7 +124,7 @@ export default function Home() {
 
   const startGame = () => {
     const roomNumber = generateRoomNumber();
-    setRoomNumber(roomNumber);
+    user ? setRoomNumber(user.username) : setRoomNumber(roomNumber);
     socket.emit("joinRoom", roomNumber);
     setInRoom(true);
   };

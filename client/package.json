@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dscvr-one/canvas-client-sdk": "^1.1.0",
     "@next/env": "^14.2.5",
     "next": "14.2.5",
     "react": "^18",
