@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { CanvasInterface, CanvasClient } from "@dscvr-one/canvas-client-sdk";
 
-const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
-const canvasClient = new CanvasClient();
+const socket: Socket = io("https://localhost:4000");
+// const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
 
-export default async function Home() {
-  const canvasHandshakeResponse = await canvasClient.ready();
+export default function Home() {
+  const canvasClient = new CanvasClient();
 
   const [board, setBoard] = useState<string[]>(Array(9).fill(""));
   const [isXPlaying, setIsXPlaying] = useState<boolean>(true);
@@ -28,9 +28,13 @@ export default async function Home() {
   >(undefined);
 
   useEffect(() => {
-    if (canvasHandshakeResponse) {
-      setUser(canvasHandshakeResponse.untrusted.user);
-    }
+    const fetchUser = async () => {
+      const canvasHandshakeResponse = await canvasClient.ready();
+
+      if (canvasHandshakeResponse) {
+        setUser(canvasHandshakeResponse.untrusted.user);
+      }
+    };
     socket.on("roleAssignment", (data: { role: "X" | "O" }) => {
       setRole(data.role);
     });
