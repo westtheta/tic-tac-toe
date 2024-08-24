@@ -1,12 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
-import { CanvasInterface, CanvasClient } from "@dscvr-one/canvas-client-sdk";
+import Board from "./components/Board";
+import HomePage from "./components/HomePage";
+import { useCanvasClient } from "./utils/useCanvasClient";
 
 // const socket: Socket = io("https://localhost:4000");
 const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
 
 export default function Home() {
+  const { client, user, content, isReady } = useCanvasClient();
+
   const [board, setBoard] = useState<string[]>(Array(9).fill(""));
   const [isXPlaying, setIsXPlaying] = useState<boolean>(true);
   const [gameOver, setGameOver] = useState<boolean>(false);
@@ -21,30 +25,27 @@ export default function Home() {
   const [oWins, setOWins] = useState<number>(0);
   const [availableRooms, setAvailableRooms] = useState<string[]>([]);
   const [role, setRole] = useState<"X" | "O" | "">("");
-  const [user, setUser] = useState<
-    { id: string; username: string; avatar?: string | undefined } | undefined
-  >(undefined);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const canvasClient = new CanvasClient();
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const canvasClient = new CanvasClient();
 
-      const fetchUser = async () => {
-        try {
-          const canvasHandshakeResponse = await canvasClient.ready();
-          if (canvasHandshakeResponse) {
-            setUser(canvasHandshakeResponse.untrusted.user);
-          } else {
-            console.error("Canvas handshake failed:", canvasHandshakeResponse);
-          }
-        } catch (error) {
-          console.error("Error fetching user from Canvas:", error);
-        }
-      };
+  //     const fetchUser = async () => {
+  //       try {
+  //         const canvasHandshakeResponse = await canvasClient.ready();
+  //         if (canvasHandshakeResponse) {
+  //           setUser(canvasHandshakeResponse.untrusted.user);
+  //         } else {
+  //           console.error("Canvas handshake failed:", canvasHandshakeResponse);
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching user from Canvas:", error);
+  //       }
+  //     };
 
-      fetchUser();
-    }
-  }, []);
+  //     fetchUser();
+  //   }
+  // }, []);
 
   useEffect(() => {
     socket.on("roleAssignment", (data: { role: "X" | "O" }) => {
@@ -139,8 +140,9 @@ export default function Home() {
   };
 
   const startGame = () => {
-    const roomNumber = generateRoomNumber();
-    user ? setRoomNumber(user.username) : setRoomNumber(roomNumber);
+    // Use the user's username as the room number if available, otherwise generate a random number
+    const roomNumber = user ? user.username : generateRoomNumber();
+    setRoomNumber(roomNumber);
     socket.emit("joinRoom", roomNumber);
     setInRoom(true);
   };
@@ -165,59 +167,23 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       {!inRoom ? (
-        <div className="flex flex-col items-center gap-4">
-          <h2 className="text-2xl font-bold">Tic-Tac-Toe</h2>
-          <button onClick={startGame} className="p-2 bg-blue-500 text-white">
-            Create Room
-          </button>
-          <div>
-            <input
-              type="text"
-              placeholder="Enter room number"
-              value={inputRoom}
-              onChange={(e) => setInputRoom(e.target.value)}
-              className="border p-2"
-            />
-            <button onClick={joinRoom} className="p-2 bg-blue-500 text-white">
-              Join Room
-            </button>
-          </div>
-          <div>
-            <h3>Available Rooms</h3>
-            <ul>
-              {availableRooms.map((room) => (
-                <li key={room}>{room}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        <HomePage
+          startGame={startGame}
+          inputRoom={inputRoom}
+          setInputRoom={setInputRoom}
+          availableRooms={availableRooms}
+          joinRoom={joinRoom}
+        />
       ) : (
-        <>
-          <h3 className="text-2xl font-bold mb-4">Room {roomNumber}</h3>
-          <div className="grid grid-cols-3 gap-4">
-            {board.map((cell, index) => (
-              <button
-                key={index}
-                onClick={() => handlePlay(index)}
-                className={`border p-8 ${
-                  winningIndexes.includes(index) ? "bg-green-300" : ""
-                }`}
-              >
-                {cell}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center justify-between mt-4">
-            <button onClick={resetGame} className="p-2 bg-red-500 text-white">
-              Reset Game
-            </button>
-            <div>
-              <p>
-                X Wins: {xWins} | O Wins: {oWins}
-              </p>
-            </div>
-          </div>
-        </>
+        <Board
+          roomNumber={roomNumber}
+          board={board}
+          handlePlay={handlePlay}
+          winningIndexes={winningIndexes}
+          resetGame={resetGame}
+          xWins={xWins}
+          oWins={oWins}
+        />
       )}
 
       {showToast && (
