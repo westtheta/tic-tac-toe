@@ -7,8 +7,6 @@ import { CanvasInterface, CanvasClient } from "@dscvr-one/canvas-client-sdk";
 const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
 
 export default function Home() {
-  const canvasClient = new CanvasClient();
-
   const [board, setBoard] = useState<string[]>(Array(9).fill(""));
   const [isXPlaying, setIsXPlaying] = useState<boolean>(true);
   const [gameOver, setGameOver] = useState<boolean>(false);
@@ -28,13 +26,27 @@ export default function Home() {
   >(undefined);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const canvasHandshakeResponse = await canvasClient.ready();
+    if (typeof window !== "undefined") {
+      const canvasClient = new CanvasClient();
 
-      if (canvasHandshakeResponse) {
-        setUser(canvasHandshakeResponse.untrusted.user);
-      }
-    };
+      const fetchUser = async () => {
+        try {
+          const canvasHandshakeResponse = await canvasClient.ready();
+          if (canvasHandshakeResponse) {
+            setUser(canvasHandshakeResponse.untrusted.user);
+          } else {
+            console.error("Canvas handshake failed:", canvasHandshakeResponse);
+          }
+        } catch (error) {
+          console.error("Error fetching user from Canvas:", error);
+        }
+      };
+
+      fetchUser();
+    }
+  }, []);
+
+  useEffect(() => {
     socket.on("roleAssignment", (data: { role: "X" | "O" }) => {
       setRole(data.role);
     });
