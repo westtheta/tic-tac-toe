@@ -75,7 +75,7 @@ function Board({
       <h3 className="text-2xl font-bold mb-4 text-center md:text-left">
         Room {roomNumber}
       </h3>
-      <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
+      <div className="grid grid-cols-3 gap-4 max-w-[90%] md:max-w-md mx-auto">
         {board.map((cell, index) => (
           <button
             key={index}
