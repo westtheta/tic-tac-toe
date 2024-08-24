@@ -12,7 +12,7 @@ const io = new Server(server, {
     origin: [
       "https://tic-tac-toe-mu-blue.vercel.app",
       "https://www.tic-tac-toe-mu-blue.vercel.app",
-      "http://localhost:3000/",
+      // "http://localhost:3000/",
     ],
     methods: ["GET", "POST"],
   },

@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { CanvasInterface, CanvasClient } from "@dscvr-one/canvas-client-sdk";
 
-const socket: Socket = io("https://localhost:4000");
-// const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
+// const socket: Socket = io("https://localhost:4000");
+const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
 
 export default function Home() {
   const canvasClient = new CanvasClient();
