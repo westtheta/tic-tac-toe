@@ -12,6 +12,8 @@ const io = new Server(server, {
     origin: [
       "https://tic-tac-toe-mu-blue.vercel.app",
       "https://www.tic-tac-toe-mu-blue.vercel.app",
+      "https://dscvr.one/",
+      "https://www.dscvr.one/"
       // "http://localhost:3000/",
     ],
     methods: ["GET", "POST"],
