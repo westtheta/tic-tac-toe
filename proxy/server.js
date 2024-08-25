@@ -13,6 +13,11 @@ app.use(
   })
 );
 
+app.get("/cron", (req, res) => {
+  res.send("Wagwan my bro");
+});
+
+
 app.get(/, (req, res) => {
   res.send(WebSocket Proxy Server);
 });
