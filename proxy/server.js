@@ -22,7 +22,11 @@ const server = http.createServer((req, res) => {
     res.end("Wagwan my bro");
   } else {
     // Proxy all other requests
-    proxy.web(req, res, { target: "https://tic-tac-toe-28r3.onrender.com" });
+    // proxy.web(req, res, { target: "https://tic-tac-toe-28r3.onrender.com" });
+    proxy.web(req, res, {
+      target: "https://tic-tac-toe-28r3.onrender.com",
+      changeOrigin: true,
+    });
   }
 });
 
