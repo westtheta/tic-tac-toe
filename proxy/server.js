@@ -18,15 +18,12 @@ app.use((req, res, next) => {
 app.use(
   "/socket.io",
   createProxyMiddleware({
-    target: "https://tic-tac-toe-28r3.onrender.com", // Your original server
+    target: "https://tic-tac-toe-28r3.onrender.com",
     changeOrigin: true,
-    ws: true, // Enable WebSocket proxying
+    ws: true,
     logLevel: "debug",
     pathRewrite: {
-      "^/socket.io": "/socket.io", // Optional, ensure this matches what your target server expects
-    },
-    onProxyReqWs: (proxyReq, req, socket, options, head) => {
-      console.log("WebSocket request:", req.url);
+      "^/socket.io": "/socket.io", // This should match your server's expectation
     },
   })
 );

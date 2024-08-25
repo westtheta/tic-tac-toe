@@ -6,8 +6,9 @@ import HomePage from "./components/HomePage";
 import { useCanvasClient } from "./utils/useCanvasClient";
 
 // const socket: Socket = io("https://localhost:4000");
-const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
-// const socket: Socket = io("https://tic-tac-toe-proxy.onrender.com/socket.io")
+// const socket: Socket = io("https://tic-tac-toe-28r3.onrender.com/");
+const socket: Socket = io("https://tic-tac-toe-proxy.onrender.com");
+
 
 export default function Home() {
   const { client, user, content, isReady } = useCanvasClient();
