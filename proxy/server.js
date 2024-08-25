@@ -15,6 +15,19 @@ app.use((req, res, next) => {
   next();
 });
 
+// app.use(
+//   "/socket.io",
+//   createProxyMiddleware({
+//     target: "https://tic-tac-toe-28r3.onrender.com",
+//     changeOrigin: true,
+//     ws: true,
+//     logLevel: "debug",
+//     pathRewrite: {
+//       "^/socket.io": "/socket.io", // This should match your server's expectation
+//     },
+//   })
+// );
+
 app.use(
   "/socket.io",
   createProxyMiddleware({
@@ -22,11 +35,9 @@ app.use(
     changeOrigin: true,
     ws: true,
     logLevel: "debug",
-    pathRewrite: {
-      "^/socket.io": "/socket.io", // This should match your server's expectation
-    },
   })
 );
+
 
 app.get("/", (req, res) => {
   res.send("WebSocket Proxy Server");
