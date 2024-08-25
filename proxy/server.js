@@ -19,5 +19,5 @@ server.on("upgrade", (req, socket, head) => {
 });
 
 server.listen(3000, () => {
-  console.log("Proxy server with cron route is running on port 3000");
+  console.log("Proxy server is running on port 3000");
 });
