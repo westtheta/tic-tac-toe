@@ -14,6 +14,7 @@ app.use(
     target: "https://tic-tac-toe-28r3.onrender.com", // Your original server
     changeOrigin: true,
     ws: true, // Enable WebSocket proxying
+    logLevel: "debug",
     pathRewrite: {
       "^/socket.io": "/socket.io", // Optional, ensure this matches what your target server expects
     },
