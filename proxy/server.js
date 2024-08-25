@@ -3,13 +3,23 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const app = express();
 
-// Proxy middleware
+app.use((req, res, next) => {
+  console.log(`Received request for ${req.url}`);
+  next();
+});
+
 app.use(
   "/socket.io",
   createProxyMiddleware({
     target: "https://tic-tac-toe-28r3.onrender.com", // Your original server
     changeOrigin: true,
     ws: true, // Enable WebSocket proxying
+    pathRewrite: {
+      "^/socket.io": "/socket.io", // Optional, ensure this matches what your target server expects
+    },
+    onProxyReqWs: (proxyReq, req, socket, options, head) => {
+      console.log("WebSocket request:", req.url);
+    },
   })
 );
 
