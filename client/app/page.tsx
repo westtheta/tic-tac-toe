@@ -5,10 +5,16 @@ import Board from "./components/Board";
 import HomePage from "./components/HomePage";
 import { useCanvasClient } from "./utils/useCanvasClient";
 
-// const socket: Socket = io("https://localhost:4000");
-const socket: Socket = io("https://tic-tac-toe-29r3.onrender.com/");
-//const socket: Socket = io("https://tic-tac-toe-proxy.onrender.com");
-
+const socket: Socket = io(
+  // "https://localhost:4000",
+  // "https://tic-tac-toe-proxy.onrender.com",
+  "https://tic-tac-toe-29r3.onrender.com/",
+  {
+    transports: ["websocket", "polling"],
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+  }
+);
 
 export default function Home() {
   const { client, user, content, isReady } = useCanvasClient();
