@@ -7,16 +7,7 @@ const app = express();
 
 // CORS options to allow requests from specific origins
 const corsOptions = {
-  origin: [
-    "https://tic-tac-toe-mu-blue.vercel.app",
-    "https://www.tic-tac-toe-mu-blue.vercel.app",
-    "https://dscvr.one/*",
-    "https://www.dscvr.one/*",
-    "https://api.dscvr.one",
-    "https://api1.stg.dscvr.one",
-    "https://*.helius-rpc.com",
-    "http://localhost:3000/",
-  ],
+  origin: ["https://tic-tac-toe-mu-blue.vercel.app"],
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"],
   credentials: true,
