@@ -15,7 +15,7 @@ const corsOptions = {
     "https://api.dscvr.one",
     "https://api1.stg.dscvr.one",
     "https://*.helius-rpc.com",
-    // "http://localhost:3000/",
+    "http://localhost:3000/",
   ],
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"],
@@ -37,7 +37,6 @@ app.get("/cron", (req, res) => {
 
 let rooms = {};
 let openRooms = new Set();
-
 io.on("connection", (socket) => {
   console.log(`User ${socket.id} connected`);
 
@@ -100,6 +99,7 @@ io.on("connection", (socket) => {
 
   socket.on("quitGame", (room) => {
     if (rooms[room]) {
+      // Notify all players in the room that someone quit
       io.in(room).emit("playerQuit", "A player has quit the game.");
 
       const opponentId = rooms[room].players.find((id) => id !== socket.id);
@@ -118,6 +118,7 @@ io.on("connection", (socket) => {
     for (const room in rooms) {
       const roomData = rooms[room];
       if (roomData.players.includes(socket.id)) {
+        // Notify all players in the room that someone disconnected
         io.in(room).emit("playerDisconnected", "A player has disconnected.");
 
         const opponentId = roomData.players.find((id) => id !== socket.id);

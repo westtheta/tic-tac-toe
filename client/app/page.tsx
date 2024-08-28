@@ -6,9 +6,9 @@ import HomePage from "./components/HomePage";
 import { useCanvasClient } from "./utils/useCanvasClient";
 
 const socket: Socket = io(
-  // "https://localhost:4000",
-  // "https://tic-tac-toe-proxy.onrender.com",
-  "https://tic-tac-toe-29r3.onrender.com/",
+  process.env.NODE_ENV === "production"
+    ? "wss://tic-tac-toe-29r3.onrender.com"
+    : "ws://localhost:4000",
   {
     transports: ["websocket", "polling"],
     reconnectionAttempts: 5,
